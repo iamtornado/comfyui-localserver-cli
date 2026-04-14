@@ -244,6 +244,11 @@ def prompt_submit(
         help="Explicit prompt_id (default: random UUID)",
     ),
     raw: bool = typer.Option(False, "--raw", help="Include full POST /prompt response fields only"),
+    pretty: bool = typer.Option(
+        False,
+        "--pretty",
+        help="Pretty-print JSON for this command (compat: supports `prompt submit --pretty`)",
+    ),
 ) -> None:
     """POST /prompt — queue a workflow; returns prompt_id and queue number."""
     cid = client_id or str(uuid.uuid4())
@@ -254,16 +259,16 @@ def prompt_submit(
             body = _post_prompt_and_resolve_id(c, wf, cid, pid, None)
         log_verbose(f"client_id={cid} prompt_id={pid}", verbose=ctx.obj["verbose"])
         if raw:
-            _emit(ctx, body)
+            emit_json(body, pretty=bool(ctx.obj["pretty"]) or pretty)
         else:
-            _emit(
-                ctx,
+            emit_json(
                 {
                     "prompt_id": body.get("prompt_id", pid),
                     "number": body.get("number"),
                     "client_id": cid,
                     "node_errors": body.get("node_errors"),
                 },
+                pretty=bool(ctx.obj["pretty"]) or pretty,
             )
     except ComfyUIError as e:
         _exit(e)
@@ -294,6 +299,11 @@ def prompt_wait(
         help="Use WebSocket for earlier completion detection (still polls /history for outputs)",
     ),
     raw_history: bool = typer.Option(False, "--raw-history", help="Include full history entry under raw_history"),
+    pretty: bool = typer.Option(
+        False,
+        "--pretty",
+        help="Pretty-print JSON for this command (compat: supports `prompt wait --pretty`)",
+    ),
 ) -> None:
     """POST /prompt, then poll GET /history/{prompt_id} until done or timeout."""
     cid = client_id or str(uuid.uuid4())
@@ -364,7 +374,7 @@ def prompt_wait(
             with _client(ctx) as c:
                 result["queue_snapshot"] = c.get_queue()
 
-        _emit(ctx, result)
+        emit_json(result, pretty=bool(ctx.obj["pretty"]) or pretty)
 
         if timed_out:
             raise typer.Exit(5)
