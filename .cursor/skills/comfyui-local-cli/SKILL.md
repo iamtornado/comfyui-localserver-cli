@@ -1,15 +1,15 @@
 ---
-name: comfyui-local-cli
-description: Run local ComfyUI workflows through the comfyui-local CLI, including prompt injection, seed/filename overrides, submit/wait patterns, and result parsing. Use when users ask to run ComfyUI API JSON workflows, change prompts without editing source files, or automate image generation for AI agents.
+name: comfyui-localserver-cli-cli
+description: Run local ComfyUI workflows through the comfyui-localserver-cli CLI, including prompt injection, seed/filename overrides, submit/wait patterns, and result parsing. Use when users ask to run ComfyUI API JSON workflows, change prompts without editing source files, or automate image generation for AI agents.
 ---
 
-# comfyui-local-cli
+# comfyui-localserver-cli-cli
 
 ## When to use
 
 Use this skill when the task mentions:
 
-- `comfyui-local` commands
+- `comfyui-localserver-cli` commands
 - local ComfyUI workflow execution
 - changing prompt/seed/output filename at runtime
 - `prompt submit` / `prompt wait`
@@ -19,13 +19,13 @@ Use this skill when the task mentions:
 
 - ComfyUI server is running locally (default `http://127.0.0.1:8188`)
 - Workflow is API-format JSON
-- CLI is available as `comfyui-local`
+- CLI is available as `comfyui-localserver-cli`
 
 ## Core workflow
 
 1. Identify modifiable node paths in workflow JSON (for example text, seed, filename prefix).
 2. Use `jq` to patch JSON on stdin (avoid mutating source files unless requested).
-3. Pipe to `comfyui-local prompt wait` for end-to-end execution.
+3. Pipe to `comfyui-localserver-cli prompt wait` for end-to-end execution.
 4. Return key fields: `prompt_id`, `status`, `images[].filename`, `view_urls[]`.
 
 ## Command patterns
@@ -33,7 +33,7 @@ Use this skill when the task mentions:
 ### Health check
 
 ```bash
-comfyui-local health --pretty
+comfyui-localserver-cli health --pretty
 ```
 
 ### Run workflow with prompt override
@@ -41,7 +41,7 @@ comfyui-local health --pretty
 ```bash
 PROMPT='A cinematic portrait, warm tones, ultra detailed'
 jq --arg p "$PROMPT" '.["57:27"].inputs.text = $p' workflow.json \
-  | comfyui-local prompt wait --pretty --timeout-sec 120
+  | comfyui-localserver-cli prompt wait --pretty --timeout-sec 120
 ```
 
 ### Override prompt + seed + output filename prefix
@@ -56,14 +56,14 @@ jq --arg p "$PROMPT" --argjson s "$SEED" --arg o "$OUT" \
    | .["57:3"].inputs.seed = $s
    | .["9"].inputs.filename_prefix = $o' \
   workflow.json \
-  | comfyui-local prompt wait --pretty --timeout-sec 120
+  | comfyui-localserver-cli prompt wait --pretty --timeout-sec 120
 ```
 
 ### Submit only (non-blocking)
 
 ```bash
 jq --arg p "$PROMPT" '.["57:27"].inputs.text = $p' workflow.json \
-  | comfyui-local prompt submit --pretty
+  | comfyui-localserver-cli prompt submit --pretty
 ```
 
 ### Submit first, check progress later
@@ -74,17 +74,17 @@ PROMPT='A cinematic portrait, warm tones, ultra detailed'
 # 1) Submit without waiting, capture prompt_id
 PROMPT_ID=$(
   jq --arg p "$PROMPT" '.["57:27"].inputs.text = $p' workflow.json \
-    | comfyui-local prompt submit \
+    | comfyui-localserver-cli prompt submit \
     | jq -r '.prompt_id'
 )
 
 echo "prompt_id=$PROMPT_ID"
 
 # 2) Check current queue status (running/pending)
-comfyui-local queue get --pretty
+comfyui-localserver-cli queue get --pretty
 
 # 3) Query this prompt's history/result when needed
-comfyui-local history --prompt-id "$PROMPT_ID" --pretty
+comfyui-localserver-cli history --prompt-id "$PROMPT_ID" --pretty
 ```
 
 ## Output interpretation

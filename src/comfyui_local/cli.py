@@ -23,7 +23,7 @@ from comfyui_local.io_util import emit_json, log_verbose, read_workflow_json
 from comfyui_local.ws_util import http_to_ws_base, watch_prompt_ws
 
 app = typer.Typer(
-    name="comfyui-local",
+    name="comfyui-localserver-cli",
     help="ComfyUI local server CLI for AI agents (JSON on stdout).",
     no_args_is_help=True,
 )

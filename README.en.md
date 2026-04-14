@@ -1,4 +1,4 @@
-# comfyui-localserver-cli
+# comfyui-localserver-cliserver-cli
 
 [English](README.en.md) | [中文](README.md)
 
@@ -12,7 +12,7 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-The `comfyui-local` command is installed on your PATH.
+The `comfyui-localserver-cli` command is installed on your PATH.
 
 ## Agent-oriented usage
 
@@ -25,25 +25,25 @@ Examples:
 
 ```bash
 # Health / VRAM-ish stats
-comfyui-local health
-comfyui-local health --deep
+comfyui-localserver-cli health
+comfyui-localserver-cli health --deep
 
 # Queue a workflow (stdin)
-comfyui-local prompt submit < workflow_api.json
+comfyui-localserver-cli prompt submit < workflow_api.json
 
 # Queue and block until history contains outputs (polls GET /history/{prompt_id})
-comfyui-local prompt wait --workflow workflow_api.json --timeout-sec 600
+comfyui-localserver-cli prompt wait --workflow workflow_api.json --timeout-sec 600
 
 # Same, but connect WebSocket first for earlier completion signal (still uses history for image list)
-comfyui-local prompt wait --workflow workflow_api.json --websocket
+comfyui-localserver-cli prompt wait --workflow workflow_api.json --websocket
 
 # Queue inspection / control (see ComfyUI server.py for POST /queue semantics)
-comfyui-local queue get
-comfyui-local queue clear
-comfyui-local queue delete <prompt_id>
+comfyui-localserver-cli queue get
+comfyui-localserver-cli queue clear
+comfyui-localserver-cli queue delete <prompt_id>
 
-comfyui-local interrupt
-comfyui-local history --prompt-id <prompt_id>
+comfyui-localserver-cli interrupt
+comfyui-localserver-cli history --prompt-id <prompt_id>
 ```
 
 ### Exit codes
@@ -61,7 +61,7 @@ comfyui-local history --prompt-id <prompt_id>
 The following is from a real local run:
 
 ```bash
-comfyui-local health --pretty
+comfyui-localserver-cli health --pretty
 ```
 
 ```json

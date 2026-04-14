@@ -1,4 +1,4 @@
-# comfyui-localserver-cli
+# comfyui-localserver-cliserver-cli
 
 [中文](README.md) | [English](README.en.md)
 
@@ -12,7 +12,7 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-安装完成后可直接使用命令 `comfyui-local`。
+安装完成后可直接使用命令 `comfyui-localserver-cli`。
 
 ## 面向 Agent 的使用方式
 
@@ -25,25 +25,25 @@ pip install -e .
 
 ```bash
 # 健康检查 / 系统信息
-comfyui-local health
-comfyui-local health --deep
+comfyui-localserver-cli health
+comfyui-localserver-cli health --deep
 
 # 提交工作流（从 stdin 读取）
-comfyui-local prompt submit < workflow_api.json
+comfyui-localserver-cli prompt submit < workflow_api.json
 
 # 提交并阻塞等待完成（轮询 GET /history/{prompt_id}）
-comfyui-local prompt wait --workflow workflow_api.json --timeout-sec 600
+comfyui-localserver-cli prompt wait --workflow workflow_api.json --timeout-sec 600
 
 # 先连 WebSocket 以更早感知完成（仍用 history 提取产物）
-comfyui-local prompt wait --workflow workflow_api.json --websocket
+comfyui-localserver-cli prompt wait --workflow workflow_api.json --websocket
 
 # 队列查看与控制（POST /queue 语义以 ComfyUI server.py 为准）
-comfyui-local queue get
-comfyui-local queue clear
-comfyui-local queue delete <prompt_id>
+comfyui-localserver-cli queue get
+comfyui-localserver-cli queue clear
+comfyui-localserver-cli queue delete <prompt_id>
 
-comfyui-local interrupt
-comfyui-local history --prompt-id <prompt_id>
+comfyui-localserver-cli interrupt
+comfyui-localserver-cli history --prompt-id <prompt_id>
 ```
 
 ### 退出码
@@ -61,7 +61,7 @@ comfyui-local history --prompt-id <prompt_id>
 以下为本地实际运行结果：
 
 ```bash
-comfyui-local health --pretty
+comfyui-localserver-cli health --pretty
 ```
 
 ```json

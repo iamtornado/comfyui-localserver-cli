@@ -1,2 +1,2 @@
 [console_scripts]
-comfyui-local = comfyui_local.cli:main
+comfyui-localserver-cli = comfyui_local.cli:main
