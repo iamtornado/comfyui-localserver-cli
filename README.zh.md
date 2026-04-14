@@ -1,5 +1,7 @@
 # comfyui-localserver-cli
 
+[中文](README.md) | [English](README.en.md)
+
 这是一个面向 **本地部署 ComfyUI**（`server.py` / aiohttp）的 CLI，主要给 AI Agent（如 OpenClaw、Cursor 等）调用。它封装了官方文档中的 HTTP API（例如 [`/prompt`](https://docs.comfy.org/development/comfyui-server/comms_routes)、[`/queue`](https://docs.comfy.org/development/comfyui-server/comms_routes)、[`/history`](https://docs.comfy.org/development/comfyui-server/comms_routes)）以及可选的 WebSocket 进度事件（[message types](https://docs.comfy.org/development/comfyui-server/comms_messages)）。
 
 ## 安装

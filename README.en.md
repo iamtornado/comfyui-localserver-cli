@@ -1,5 +1,7 @@
 # comfyui-localserver-cli
 
+[English](README.en.md) | [中文](README.md)
+
 Small CLI for **locally hosted ComfyUI** (`server.py` / aiohttp), aimed at AI agents (OpenClaw, Cursor, and similar). It wraps the documented HTTP API (for example [`/prompt`](https://docs.comfy.org/development/comfyui-server/comms_routes), [`/queue`](https://docs.comfy.org/development/comfyui-server/comms_routes), [`/history`](https://docs.comfy.org/development/comfyui-server/comms_routes)) and optional WebSocket progress ([message types](https://docs.comfy.org/development/comfyui-server/comms_messages)).
 
 ## Install
