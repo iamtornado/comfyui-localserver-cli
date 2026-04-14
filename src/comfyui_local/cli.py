@@ -64,6 +64,10 @@ def _emit(ctx: typer.Context, data: Any) -> None:
     emit_json(data, pretty=ctx.obj["pretty"])
 
 
+def _resolved_verbose(ctx: typer.Context, local_verbose: bool) -> bool:
+    return bool(ctx.obj.get("verbose", False)) or local_verbose
+
+
 def _exit(e: ComfyUIError) -> None:
     err_body: dict[str, Any] = {"error": str(e)}
     if e.detail is not None:
@@ -88,9 +92,17 @@ def health_cmd(
         "--pretty",
         help="Pretty-print JSON for this command (compat: supports `health --pretty`)",
     ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Verbose logs for this command (compat: supports `health --verbose`)",
+    ),
 ) -> None:
     """GET /system_stats (and optionally /features)."""
+    v = _resolved_verbose(ctx, verbose)
     try:
+        log_verbose("Running health check", verbose=v)
         with _client(ctx) as c:
             out: dict[str, Any] = {"system_stats": c.get_system_stats()}
             if deep:
@@ -108,12 +120,25 @@ def interrupt_cmd(
         "--prompt-id",
         help="If set, interrupt only when this prompt_id is running; otherwise global interrupt",
     ),
+    pretty: bool = typer.Option(
+        False,
+        "--pretty",
+        help="Pretty-print JSON for this command (compat: supports `interrupt --pretty`)",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Verbose logs for this command (compat: supports `interrupt --verbose`)",
+    ),
 ) -> None:
     """POST /interrupt (optional targeted prompt_id in JSON body)."""
     payload: dict[str, Any] = {}
     if prompt_id:
         payload["prompt_id"] = prompt_id
+    v = _resolved_verbose(ctx, verbose)
     try:
+        log_verbose(f"POST /interrupt payload={payload}", verbose=v)
         with _client(ctx) as c:
             code, body = c.post_interrupt(payload)
         if code >= 400:
@@ -122,25 +147,55 @@ def interrupt_cmd(
                 exit_code=2 if code < 500 else 4,
                 detail=body,
             )
-        _emit(ctx, {"ok": True, "http_status": code, "body": body})
+        emit_json({"ok": True, "http_status": code, "body": body}, pretty=bool(ctx.obj["pretty"]) or pretty)
     except ComfyUIError as e:
         _exit(e)
 
 
 @queue_app.command("get")
-def queue_get(ctx: typer.Context) -> None:
+def queue_get(
+    ctx: typer.Context,
+    pretty: bool = typer.Option(
+        False,
+        "--pretty",
+        help="Pretty-print JSON for this command (compat: supports `queue get --pretty`)",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Verbose logs for this command (compat: supports `queue get --verbose`)",
+    ),
+) -> None:
     """GET /queue (queue_running, queue_pending)."""
+    v = _resolved_verbose(ctx, verbose)
     try:
+        log_verbose("GET /queue", verbose=v)
         with _client(ctx) as c:
-            _emit(ctx, c.get_queue())
+            emit_json(c.get_queue(), pretty=bool(ctx.obj["pretty"]) or pretty)
     except ComfyUIError as e:
         _exit(e)
 
 
 @queue_app.command("clear")
-def queue_clear(ctx: typer.Context) -> None:
+def queue_clear(
+    ctx: typer.Context,
+    pretty: bool = typer.Option(
+        False,
+        "--pretty",
+        help="Pretty-print JSON for this command (compat: supports `queue clear --pretty`)",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Verbose logs for this command (compat: supports `queue clear --verbose`)",
+    ),
+) -> None:
     """POST /queue with {\"clear\": true} — removes pending items (ComfyUI server.py)."""
+    v = _resolved_verbose(ctx, verbose)
     try:
+        log_verbose("POST /queue {clear:true}", verbose=v)
         with _client(ctx) as c:
             code, body = c.post_queue({"clear": True})
         if code >= 400:
@@ -149,7 +204,7 @@ def queue_clear(ctx: typer.Context) -> None:
                 exit_code=2 if code < 500 else 4,
                 detail=body,
             )
-        _emit(ctx, {"ok": True, "http_status": code, "body": body})
+        emit_json({"ok": True, "http_status": code, "body": body}, pretty=bool(ctx.obj["pretty"]) or pretty)
     except ComfyUIError as e:
         _exit(e)
 
@@ -158,9 +213,22 @@ def queue_clear(ctx: typer.Context) -> None:
 def queue_delete(
     ctx: typer.Context,
     prompt_id: list[str] = typer.Argument(..., help="One or more prompt_id values to remove from pending queue"),
+    pretty: bool = typer.Option(
+        False,
+        "--pretty",
+        help="Pretty-print JSON for this command (compat: supports `queue delete --pretty`)",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Verbose logs for this command (compat: supports `queue delete --verbose`)",
+    ),
 ) -> None:
     """POST /queue with {\"delete\": [prompt_id, ...]}."""
+    v = _resolved_verbose(ctx, verbose)
     try:
+        log_verbose(f"POST /queue delete={list(prompt_id)}", verbose=v)
         with _client(ctx) as c:
             code, body = c.post_queue({"delete": list(prompt_id)})
         if code >= 400:
@@ -169,7 +237,7 @@ def queue_delete(
                 exit_code=2 if code < 500 else 4,
                 detail=body,
             )
-        _emit(ctx, {"ok": True, "http_status": code, "body": body})
+        emit_json({"ok": True, "http_status": code, "body": body}, pretty=bool(ctx.obj["pretty"]) or pretty)
     except ComfyUIError as e:
         _exit(e)
 
@@ -182,11 +250,24 @@ def history_cmd(
         "--prompt-id",
         help="GET /history/{prompt_id}; omit for GET /history",
     ),
+    pretty: bool = typer.Option(
+        False,
+        "--pretty",
+        help="Pretty-print JSON for this command (compat: supports `history --pretty`)",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Verbose logs for this command (compat: supports `history --verbose`)",
+    ),
 ) -> None:
     """GET /history or /history/{prompt_id}."""
+    v = _resolved_verbose(ctx, verbose)
     try:
+        log_verbose(f"GET /history prompt_id={prompt_id}", verbose=v)
         with _client(ctx) as c:
-            _emit(ctx, c.get_history(prompt_id))
+            emit_json(c.get_history(prompt_id), pretty=bool(ctx.obj["pretty"]) or pretty)
     except ComfyUIError as e:
         _exit(e)
 
@@ -249,15 +330,22 @@ def prompt_submit(
         "--pretty",
         help="Pretty-print JSON for this command (compat: supports `prompt submit --pretty`)",
     ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Verbose logs for this command (compat: supports `prompt submit --verbose`)",
+    ),
 ) -> None:
     """POST /prompt — queue a workflow; returns prompt_id and queue number."""
     cid = client_id or str(uuid.uuid4())
     pid = prompt_id or str(uuid.uuid4())
+    v = _resolved_verbose(ctx, verbose)
     try:
         wf = read_workflow_json(workflow_path)
         with _client(ctx) as c:
             body = _post_prompt_and_resolve_id(c, wf, cid, pid, None)
-        log_verbose(f"client_id={cid} prompt_id={pid}", verbose=ctx.obj["verbose"])
+        log_verbose(f"client_id={cid} prompt_id={pid}", verbose=v)
         if raw:
             emit_json(body, pretty=bool(ctx.obj["pretty"]) or pretty)
         else:
@@ -304,12 +392,18 @@ def prompt_wait(
         "--pretty",
         help="Pretty-print JSON for this command (compat: supports `prompt wait --pretty`)",
     ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Verbose logs for this command (compat: supports `prompt wait --verbose`)",
+    ),
 ) -> None:
     """POST /prompt, then poll GET /history/{prompt_id} until done or timeout."""
     cid = client_id or str(uuid.uuid4())
     pid = prompt_id or str(uuid.uuid4())
     base = ctx.obj["base_url"]
-    verbose = ctx.obj["verbose"]
+    v = _resolved_verbose(ctx, verbose)
 
     try:
         wf = read_workflow_json(workflow_path)
@@ -334,7 +428,7 @@ def prompt_wait(
                 cid,
                 pid,
                 deadline_monotonic=deadline,
-                verbose=verbose,
+                verbose=v,
                 after_connect=do_submit,
             )
         else:
