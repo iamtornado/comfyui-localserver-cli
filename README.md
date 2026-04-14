@@ -56,6 +56,56 @@ comfyui-local history --prompt-id <prompt_id>
 - `5`：`prompt wait` 超时（在超时前未在 history 看到对应 `prompt_id`）
 - `130`：被中断（Ctrl+C）
 
+## 最近测试结果
+
+以下为本地实际运行结果：
+
+```bash
+comfyui-local health --pretty
+```
+
+```json
+{
+  "system_stats": {
+    "system": {
+      "os": "linux",
+      "ram_total": 151697399808,
+      "ram_free": 144025849856,
+      "comfyui_version": "0.18.1",
+      "required_frontend_version": "1.42.8",
+      "installed_templates_version": "0.9.44",
+      "required_templates_version": "0.9.44",
+      "python_version": "3.14.3 (main, Feb  3 2026, 15:32:20) [GCC 12.3.0]",
+      "pytorch_version": "2.11.0+cu130",
+      "embedded_python": false,
+      "argv": [
+        "main.py",
+        "--listen",
+        "0.0.0.0",
+        "--enable-manager"
+      ]
+    },
+    "devices": [
+      {
+        "name": "cuda:0 Quadro RTX 5000 : cudaMallocAsync",
+        "type": "cuda",
+        "index": 0,
+        "vram_total": 16700604416,
+        "vram_free": 16572809216,
+        "torch_vram_total": 0,
+        "torch_vram_free": 0
+      }
+    ]
+  }
+}
+```
+
+```bash
+pytest -q
+```
+
+- `7 passed`
+
 ## 开发
 
 ```bash
