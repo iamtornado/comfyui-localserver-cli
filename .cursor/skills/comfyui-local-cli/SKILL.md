@@ -1,5 +1,5 @@
 ---
-name: comfyui-localserver-cli-cli
+name: comfyui-localserver-cli
 description: Run local ComfyUI workflows through the comfyui-localserver-cli CLI, including prompt injection, seed/filename overrides, submit/wait patterns, and result parsing. Use when users ask to run ComfyUI API JSON workflows, change prompts without editing source files, or automate image generation for AI agents.
 ---
 
